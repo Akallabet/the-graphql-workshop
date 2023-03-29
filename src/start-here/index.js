@@ -19,8 +19,7 @@ async function registerGraphqlHooks(app) {
         schema,
         document,
         context,
-        variables,
-        errors: [new Error('foo')]
+        variables
       }
     }
   )

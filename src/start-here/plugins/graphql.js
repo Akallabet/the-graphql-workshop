@@ -6,6 +6,7 @@ const typeDefs = `
   type Query {
     add(x: Int, y: Int): Int
     pets: [Pet]
+    findUser(id: Int!): User
     getUserByLocale: User
   }
   type Person {
@@ -16,20 +17,31 @@ const typeDefs = `
     owner: Person!
   }
   type User {
+    id: Int!
     name: String!
   locale: String!
   }
 `
+
 const Users = [
-  { name: 'John Doe', locale: 'en' },
-  { name: 'Jane', locale: 'it' },
-  { name: 'Liam', locale: 'en' }
+  { id: 1, name: 'John Doe', locale: 'en' },
+  { id: 2, name: 'Jane', locale: 'it' },
+  { id: 3, name: 'Liam', locale: 'en' }
 ]
 
 const resolvers = {
   Query: {
     add: async (_, { x, y }) => x + y,
     pets: (_, __, context) => getPets(context.app.pg),
+    findUser: (_, { id }) => {
+      const user = Users.find(user => user.id === id)
+      if (!user)
+        throw new mercurius.ErrorWithProps('Invalid user Id', {
+          code: 'USER_ID_INVALID',
+          id
+        })
+      return user
+    },
     getUserByLocale: (_, __, context) =>
       Users.find(user => user.locale === context.locale)
   }
@@ -49,15 +61,4 @@ export const loaders = {
       )
     }
   }
-}
-
-export default function (fastify, opts, next) {
-  fastify.register(mercurius, {
-    schema,
-    loaders,
-    graphiql: true,
-    context: () => ({ locale: 'en' })
-  })
-
-  next()
 }
