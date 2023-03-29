@@ -1,7 +1,33 @@
 import fastify from 'fastify'
-import autoload from '@fastify/autoload'
+import mercurius from 'mercurius'
 import postgres from '@fastify/postgres'
-import { join } from 'desm'
+import { schema, loaders } from './plugins/graphql.js'
+
+async function registerGraphqlHooks(app) {
+  await app.ready()
+  app.graphql.addHook('preParsing', async (schema, document, context) => {
+    app.log.info('preParsing')
+  })
+  app.graphql.addHook('preValidation', async (schema, document, context) => {
+    app.log.info('preValidation')
+  })
+  app.graphql.addHook(
+    'preExecution',
+    async (schema, document, context, variables) => {
+      app.log.info('preExecution')
+      return {
+        schema,
+        document,
+        context,
+        variables,
+        errors: [new Error('foo')]
+      }
+    }
+  )
+  app.graphql.addHook('onResolution', async (schema, document, context) => {
+    app.log.info('onResolution')
+  })
+}
 
 export function createServer({ config }) {
   const app = fastify({
@@ -11,17 +37,20 @@ export function createServer({ config }) {
       }
     }
   })
-  app.log.info(config)
 
   app.log.info('Starting server...')
 
   app.register(postgres, {
     connectionString: config.PG_CONNECTION_STRING
   })
-  app.register(autoload, {
-    dir: join(import.meta.url, 'plugins'),
-    options: config
+  app.register(mercurius, {
+    schema,
+    loaders,
+    graphiql: true,
+    context: () => ({ locale: 'en' })
   })
+
+  registerGraphqlHooks(app)
 
   return app
 }

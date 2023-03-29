@@ -35,9 +35,9 @@ const resolvers = {
   }
 }
 
-const schema = makeExecutableSchema({ typeDefs, resolvers })
+export const schema = makeExecutableSchema({ typeDefs, resolvers })
 
-const loaders = {
+export const loaders = {
   Pet: {
     owner: async (queries, context) => {
       const owners = await getOwnersByPets(
@@ -51,7 +51,7 @@ const loaders = {
   }
 }
 
-export default async function (fastify, opts, next) {
+export default function (fastify, opts, next) {
   fastify.register(mercurius, {
     schema,
     loaders,
