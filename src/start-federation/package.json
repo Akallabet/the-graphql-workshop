@@ -1,0 +1,12 @@
+{
+  "name": "start-federation",
+  "type": "module",
+  "scripts": {
+    "start": "node --watch server",
+    "test": "tap --no-coverage"
+  },
+  "dependencies": {
+    "@fastify/autoload": "^5.7.1",
+    "@sinclair/typebox": "^0.26.7"
+  }
+}
