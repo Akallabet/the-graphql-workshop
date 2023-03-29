@@ -6,6 +6,7 @@ const typeDefs = `
   type Query {
     add(x: Int, y: Int): Int
     pets: [Pet]
+    getUserByLocale: User
   }
   type Person {
     name: String!
@@ -14,12 +15,23 @@ const typeDefs = `
     name: String!
     owner: Person!
   }
+  type User {
+    name: String!
+  locale: String!
+  }
 `
+const Users = [
+  { name: 'John Doe', locale: 'en' },
+  { name: 'Jane', locale: 'it' },
+  { name: 'Liam', locale: 'en' }
+]
 
 const resolvers = {
   Query: {
     add: async (_, { x, y }) => x + y,
-    pets: (_, __, context) => getPets(context.app.pg)
+    pets: (_, __, context) => getPets(context.app.pg),
+    getUserByLocale: (_, __, context) =>
+      Users.find(user => user.locale === context.locale)
   }
 }
 
@@ -43,7 +55,8 @@ export default async function (fastify, opts, next) {
   fastify.register(mercurius, {
     schema,
     loaders,
-    graphiql: true
+    graphiql: true,
+    context: () => ({ locale: 'en' })
   })
 
   next()
