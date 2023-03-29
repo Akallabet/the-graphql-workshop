@@ -6,6 +6,7 @@
     "test": "tap --no-coverage"
   },
   "dependencies": {
-    "@fastify/autoload": "^5.7.1"
+    "@fastify/autoload": "^5.7.1",
+    "@sinclair/typebox": "^0.26.7"
   }
 }

@@ -1,8 +1,6 @@
 import mercurius from 'mercurius'
 import { makeExecutableSchema } from '@graphql-tools/schema'
-
-const pets = [{ name: 'Fido' }, { name: 'Rex' }]
-const owners = { Fido: { name: 'John' }, Rex: { name: 'Jane' } }
+import { getOwnersByPets, getPets } from '../lib/db.js'
 
 const typeDefs = `
   type Query {
@@ -21,7 +19,7 @@ const typeDefs = `
 const resolvers = {
   Query: {
     add: async (_, { x, y }) => x + y,
-    pets: async () => pets
+    pets: (_, __, context) => getPets(context.app.pg)
   }
 }
 
@@ -29,8 +27,14 @@ const schema = makeExecutableSchema({ typeDefs, resolvers })
 
 const loaders = {
   Pet: {
-    owner: async queries => {
-      return queries.map(({ obj }) => owners[obj.name])
+    owner: async (queries, context) => {
+      const owners = await getOwnersByPets(
+        context.app.pg,
+        queries.map(({ obj }) => obj.name)
+      )
+      return queries.map(({ obj }) =>
+        owners.find(owner => owner.id === obj.owner)
+      )
     }
   }
 }

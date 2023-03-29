@@ -1,6 +1,6 @@
 import { createServer } from './index.js'
+import { config } from './lib/config.js'
 
-const config = {}
 async function start() {
   const app = createServer({ config })
   try {
