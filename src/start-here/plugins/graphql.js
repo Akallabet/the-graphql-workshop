@@ -1,6 +1,10 @@
 import mercurius from 'mercurius'
+import { makeExecutableSchema } from '@graphql-tools/schema'
 
-const schema = `
+const pets = [{ name: 'Fido' }, { name: 'Rex' }]
+const owners = { Fido: { name: 'John' }, Rex: { name: 'Jane' } }
+
+const typeDefs = `
   type Query {
     add(x: Int, y: Int): Int
     pets: [Pet]
@@ -14,15 +18,14 @@ const schema = `
   }
 `
 
-const pets = [{ name: 'Fido' }, { name: 'Rex' }]
-const owners = { Fido: { name: 'John' }, Rex: { name: 'Jane' } }
-
 const resolvers = {
   Query: {
     add: async (_, { x, y }) => x + y,
     pets: async () => pets
   }
 }
+
+const schema = makeExecutableSchema({ typeDefs, resolvers })
 
 const loaders = {
   Pet: {
@@ -35,7 +38,6 @@ const loaders = {
 export default async function (fastify, opts, next) {
   fastify.register(mercurius, {
     schema,
-    resolvers,
     loaders,
     graphiql: true
   })
