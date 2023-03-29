@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "start": "node --watch server",
-    "test": "c8 tap --no-cov"
+    "test": "tap --no-coverage"
   },
   "dependencies": {
     "@fastify/autoload": "^5.7.1"
